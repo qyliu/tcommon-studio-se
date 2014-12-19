@@ -98,6 +98,7 @@ import org.talend.repository.model.IProxyRepositoryFactory;
 import org.talend.repository.model.RepositoryNode;
 import org.talend.repository.model.RepositoryNodeUtilities;
 import org.talend.repository.ui.utils.DBConnectionContextUtils.EDBParamName;
+import org.talend.repository.ui.utils.ExtendedNodeConnectionContextUtils.ENoSQLParamName;
 import org.talend.repository.ui.utils.FileConnectionContextUtils.EFileParamName;
 import org.talend.repository.ui.utils.OtherConnectionContextUtils.EParamName;
 import org.talend.repository.ui.wizards.context.ContextModeWizard;
@@ -294,7 +295,9 @@ public final class ConnectionContextHelper {
         } else if (conn instanceof FTPConnection) {
             varList = OtherConnectionContextUtils.getFTPSChemaVariables(label, (FTPConnection) conn);
         } else if (conn instanceof SAPConnection) {
-            varList = OtherConnectionContextUtils.getSAPConnectionVariables(label, (SAPConnection) conn, paramSet);
+            varList = OtherConnectionContextUtils.getSAPContextVariables(label, (SAPConnection) conn, paramSet);
+        } else {
+            varList = ExtendedNodeConnectionContextUtils.getContextVariables(label, conn, paramSet);
         }
 
         return varList;
@@ -326,6 +329,9 @@ public final class ConnectionContextHelper {
             }
             if (param instanceof EParamName) {
                 varList.add(((EParamName) param).name());
+            }
+            if (param instanceof ENoSQLParamName) {
+                varList.add(((ENoSQLParamName) param).name());
             }
         }
     }
@@ -370,6 +376,8 @@ public final class ConnectionContextHelper {
             //
         } else if (conn instanceof SAPConnection) {
             OtherConnectionContextUtils.setSAPConnectionPropertiesForContextMode(label, (SAPConnection) conn, paramSet);
+        } else {
+            ExtendedNodeConnectionContextUtils.setConnectionPropertiesForContextMode(label, conn, paramSet);
         }
         // set connection for context mode
         connectionItem.getConnection().setContextMode(true);
@@ -379,33 +387,37 @@ public final class ConnectionContextHelper {
     }
 
     public static void setPropertiesForExistContextMode(ConnectionItem connectionItem, Set<IConnParamName> paramSet,
-            Map<ContextItem, List<ConectionAdaptContextVariableModel>> map) {
+            Map<ContextItem, List<ConectionAdaptContextVariableModel>> modelMap) {
         if (connectionItem == null) {
             return;
         }
         ContextItem selItem = null;
-        if (map.keySet().size() == 1) {
-            selItem = map.keySet().iterator().next();
+        if (modelMap.keySet().size() == 1) {
+            selItem = modelMap.keySet().iterator().next();
         }
         Connection conn = connectionItem.getConnection();
 
         if (conn instanceof DatabaseConnection) {
-            DBConnectionContextUtils.setPropertiesForExistContextMode((DatabaseConnection) conn, paramSet, map);
+            DBConnectionContextUtils.setPropertiesForExistContextMode((DatabaseConnection) conn, paramSet, modelMap);
         } else if (conn instanceof FileConnection) {
-            FileConnectionContextUtils.setPropertiesForExistContextMode((FileConnection) conn, paramSet, map);
+            FileConnectionContextUtils.setPropertiesForExistContextMode((FileConnection) conn, paramSet, modelMap);
         } else if (conn instanceof LdifFileConnection) {
-            OtherConnectionContextUtils.setLdifFileForExistContextMode((LdifFileConnection) conn, paramSet, map);
+            OtherConnectionContextUtils.setLdifFileForExistContextMode((LdifFileConnection) conn, paramSet, modelMap);
         } else if (conn instanceof XmlFileConnection) {
-            OtherConnectionContextUtils.setXmlFileForExistContextMode((XmlFileConnection) conn, paramSet, map);
+            OtherConnectionContextUtils.setXmlFileForExistContextMode((XmlFileConnection) conn, paramSet, modelMap);
         } else if (conn instanceof LDAPSchemaConnection) {
-            OtherConnectionContextUtils.setLDAPSchemaPropertiesForExistContextMode((LDAPSchemaConnection) conn, paramSet, map);
+            OtherConnectionContextUtils.setLDAPSchemaPropertiesForExistContextMode((LDAPSchemaConnection) conn, paramSet,
+                    modelMap);
         } else if (conn instanceof SalesforceSchemaConnection) {
             OtherConnectionContextUtils.setSalesforcePropertiesForExistContextMode((SalesforceSchemaConnection) conn, paramSet,
-                    map);
+                    modelMap);
         } else if (conn instanceof WSDLSchemaConnection) {
-            OtherConnectionContextUtils.setWSDLSchemaPropertiesForExistContextMode((WSDLSchemaConnection) conn, paramSet, map);
+            OtherConnectionContextUtils.setWSDLSchemaPropertiesForExistContextMode((WSDLSchemaConnection) conn, paramSet,
+                    modelMap);
         } else if (conn instanceof SAPConnection) {
-            OtherConnectionContextUtils.setSAPConnectionPropertiesForExistContextMode((SAPConnection) conn, paramSet, map);
+            OtherConnectionContextUtils.setSAPConnectionPropertiesForExistContextMode((SAPConnection) conn, paramSet, modelMap);
+        } else {
+            ExtendedNodeConnectionContextUtils.setConnectionPropertiesForExistContextMode(conn, paramSet, modelMap);
         }
 
         // set connection for context mode

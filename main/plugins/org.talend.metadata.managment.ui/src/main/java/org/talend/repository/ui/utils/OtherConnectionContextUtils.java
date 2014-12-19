@@ -567,7 +567,7 @@ public final class OtherConnectionContextUtils {
         return varList;
     }
 
-    static List<IContextParameter> getSAPConnectionVariables(final String prefixName, SAPConnection conn,
+    static List<IContextParameter> getSAPContextVariables(final String prefixName, SAPConnection conn,
             Set<IConnParamName> paramSet) {
 
         if (conn == null || prefixName == null || paramSet == null || paramSet.isEmpty()) {

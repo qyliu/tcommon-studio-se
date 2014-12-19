@@ -15,6 +15,7 @@
    <extension-point id="repositorySeeker" name="Repository Seeker" schema="schema/repositorySeeker.exsd"/>
    <extension-point id="extended_repositorynode_handler" name="Extended Repository Node Handler" schema="schema/extended_repositorynode_handler.exsd"/>
    <extension-point id="repository_review_filter" name="repository_review_filter" schema="schema/repository_review_filter.exsd"/>
+   <extension-point id="repository_context" name="Repository_context" schema="schema/repository_context.exsd"/>
 
    <extension
          point="org.talend.core.runtime.service">
