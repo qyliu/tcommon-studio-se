@@ -27,7 +27,6 @@ import org.talend.core.model.properties.ContextItem;
 import org.talend.core.model.properties.Item;
 import org.talend.core.model.properties.Project;
 import org.talend.core.ui.context.IContextModelManager;
-import org.talend.core.ui.context.model.table.ContextTableConstants;
 import org.talend.core.ui.context.model.table.ContextTableTabChildModel;
 import org.talend.core.ui.context.model.table.ContextTableTabParentModel;
 import org.talend.core.ui.i18n.Messages;
@@ -55,9 +54,7 @@ public class ContextNatTableUtils {
         IContextParameter para = null;
         IContext context = null;
         if (manager != null) {
-            if (!(property.equals(ContextTableConstants.COLUMN_NAME_PROPERTY))) {
-                context = manager.getContext(property);
-            }
+            context = manager.getContext(property);
             if (context == null) {
                 return null;
             }

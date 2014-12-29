@@ -289,9 +289,7 @@ public class ExtendedContextColumnPropertyAccessor<R> implements IColumnProperty
         IContextParameter para = null;
         IContext context = null;
         if (manager != null) {
-            if (!(property.equals(ContextTableConstants.COLUMN_NAME_PROPERTY))) {
-                context = manager.getContext(property);
-            }
+            context = manager.getContext(property);
             if (context == null) {
                 return null;
             }
