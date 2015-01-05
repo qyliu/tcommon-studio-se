@@ -16,19 +16,26 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
 import org.talend.commons.exception.CommonExceptionHandler;
+import org.talend.commons.exception.ExceptionHandler;
 import org.talend.core.database.EDatabase4DriverClassName;
 import org.talend.core.database.conn.ConnParameterKeys;
 import org.talend.core.database.conn.HiveConfKeysForTalend;
 import org.talend.core.database.hbase.conn.version.EHBaseDistribution4Versions;
+import org.talend.core.hadoop.repository.HadoopRepositoryUtil;
 import org.talend.core.model.metadata.IMetadataConnection;
 import org.talend.core.model.metadata.builder.connection.DatabaseConnection;
 import org.talend.core.model.metadata.builder.database.JavaSqlFactory;
 import org.talend.core.model.metadata.builder.database.hive.EmbeddedHiveDataBaseMetadata;
 import org.talend.core.model.metadata.connection.hive.HiveConnVersionInfo;
 import org.talend.core.utils.ReflectionUtils;
+import org.talend.core.utils.TalendQuoteUtils;
 import org.talend.metadata.managment.hive.HiveClassLoaderFactory;
 import org.talend.metadata.managment.hive.handler.CDH4YarnHandler;
 import org.talend.metadata.managment.hive.handler.CDH5YarnHandler;
@@ -140,6 +147,7 @@ public class HiveConnectionManager extends DataBaseConnectionManager {
                 // Create a default hive connection.
             }
         }
+        setHiveJDBCProperties(metadataConn, hiveStandaloneConn);
         return hiveStandaloneConn;
     }
 
@@ -245,6 +253,7 @@ public class HiveConnectionManager extends DataBaseConnectionManager {
         } finally {
             Thread.currentThread().setContextClassLoader(currClassLoader);
         }
+        setHiveJDBCProperties(metadataConn, conn);
         return conn;
     }
 
@@ -269,13 +278,81 @@ public class HiveConnectionManager extends DataBaseConnectionManager {
      */
     public void checkConnection(IMetadataConnection metadataConn) throws ClassNotFoundException, InstantiationException,
             IllegalAccessException, SQLException {
-        // TODO: Inject hadoop properties...
+        setHadoopProperties(metadataConn);
         String hiveModel = (String) metadataConn.getParameter(ConnParameterKeys.CONN_PARA_KEY_HIVE_MODE);
         if (HiveConnVersionInfo.MODE_STANDALONE.getKey().equalsIgnoreCase(hiveModel)) {
             createHiveStandloneConnection(metadataConn);
         } else {
             EmbeddedHiveDataBaseMetadata embeddedHiveDatabaseMetadata = new EmbeddedHiveDataBaseMetadata(metadataConn);
             embeddedHiveDatabaseMetadata.checkConnection();
+        }
+    }
+
+    /**
+     * <p>
+     * Set hadoop properties to the hive connection.
+     * </p>
+     * DOC ycbai Comment method "setHadoopProperties".
+     * 
+     * @param metadataConn
+     */
+    private void setHadoopProperties(IMetadataConnection metadataConn) {
+        if (metadataConn == null) {
+            return;
+        }
+        Object connectionObj = metadataConn.getCurrentConnection();
+        if (connectionObj instanceof DatabaseConnection) {
+            DatabaseConnection currentConnection = (DatabaseConnection) connectionObj;
+            String currentHadoopProperties = currentConnection.getParameters().get(
+                    ConnParameterKeys.CONN_PARA_KEY_HIVE_PROPERTIES);
+            List<Map<String, Object>> hadoopProperties = HadoopRepositoryUtil.getHadoopPropertiesFullList(currentConnection,
+                    currentHadoopProperties, false);
+            for (Map<String, Object> propMap : hadoopProperties) {
+                String key = TalendQuoteUtils.removeQuotesIfExist(String.valueOf(propMap.get("PROPERTY"))); //$NON-NLS-1$
+                String value = TalendQuoteUtils.removeQuotesIfExist(String.valueOf(propMap.get("VALUE"))); //$NON-NLS-1$
+                if (StringUtils.isNotEmpty(key) && value != null) {
+                    System.setProperty(key, value);
+                }
+            }
+        }
+    }
+
+    /**
+     * <p>
+     * Set JDBC properties to the hive db connection.
+     * </p>
+     * DOC ycbai Comment method "setHiveJDBCProperties".
+     * 
+     * @param metadataConn
+     * @param dbConn
+     */
+    private void setHiveJDBCProperties(IMetadataConnection metadataConn, Connection dbConn) {
+        if (metadataConn == null || dbConn == null) {
+            return;
+        }
+        String jdbcPropertiesStr = String
+                .valueOf(metadataConn.getParameter(ConnParameterKeys.CONN_PARA_KEY_HIVE_JDBC_PROPERTIES));
+        List<Map<String, Object>> jdbcProperties = HadoopRepositoryUtil.getHadoopPropertiesList(jdbcPropertiesStr);
+        Statement statement = null;
+        try {
+            statement = dbConn.createStatement();
+            for (Map<String, Object> propMap : jdbcProperties) {
+                String key = TalendQuoteUtils.removeQuotesIfExist(String.valueOf(propMap.get("PROPERTY"))); //$NON-NLS-1$
+                String value = TalendQuoteUtils.removeQuotesIfExist(String.valueOf(propMap.get("VALUE"))); //$NON-NLS-1$
+                if (StringUtils.isNotEmpty(key) && value != null) {
+                    statement.execute("SET " + key + "=" + value); //$NON-NLS-1$ //$NON-NLS-2$
+                }
+            }
+        } catch (SQLException e) {
+            ExceptionHandler.process(e);
+        } finally {
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 

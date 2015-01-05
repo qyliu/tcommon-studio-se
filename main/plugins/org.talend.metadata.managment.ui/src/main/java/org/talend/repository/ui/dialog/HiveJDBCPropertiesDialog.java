@@ -19,33 +19,29 @@ import org.eclipse.swt.widgets.Shell;
 import org.talend.metadata.managment.ui.i18n.Messages;
 
 /**
- * created by ycbai on 2014年12月23日 Detailled comment
+ * 
+ * created by ycbai on 2015年1月4日 Detailled comment
  *
  */
-public class HadoopPropertiesDialog extends PropertiesDialog {
+public class HiveJDBCPropertiesDialog extends PropertiesDialog {
 
-    public HadoopPropertiesDialog(Shell parentShell, List<Map<String, Object>> initProperties) {
+    public HiveJDBCPropertiesDialog(Shell parentShell, List<Map<String, Object>> initProperties) {
         super(parentShell, null, initProperties);
     }
 
-    public HadoopPropertiesDialog(Shell parentShell, List<Map<String, Object>> initPropertiesOfParent,
+    public HiveJDBCPropertiesDialog(Shell parentShell, List<Map<String, Object>> initPropertiesOfParent,
             List<Map<String, Object>> initProperties) {
         super(parentShell, initPropertiesOfParent, initProperties);
     }
 
     @Override
     protected String getTitle() {
-        return Messages.getString("HadoopPropertiesDialog.title"); //$NON-NLS-1$
-    }
-
-    @Override
-    protected String getParentTitle() {
-        return Messages.getString("HadoopPropertiesDialog.parentProperties.title"); //$NON-NLS-1$
+        return Messages.getString("HiveJDBCPropertiesDialog.title"); //$NON-NLS-1$
     }
 
     @Override
     protected String getDesc() {
-        return Messages.getString("HadoopPropertiesDialog.desc"); //$NON-NLS-1$
+        return Messages.getString("HiveJDBCPropertiesDialog.desc"); //$NON-NLS-1$
     }
 
 }
