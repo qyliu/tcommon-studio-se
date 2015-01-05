@@ -103,9 +103,10 @@ public interface IDragAndDropServiceHandler {
      * <p>
      * Check if the table can do data viewer.
      * 
+     * @param connection
      * @param metadataTable
      * @return
      */
-    public boolean isValidForDataViewer(IMetadataTable metadataTable);
+    public boolean isValidForDataViewer(Connection connection, IMetadataTable metadataTable);
 
 }
