@@ -415,6 +415,24 @@ public final class ConnectionUtils {
     }
 
     /**
+     * 
+     * DOC Comment method "isExasol".
+     * 
+     * @param metadata
+     * @return
+     * @throws SQLException
+     */
+    public static boolean isExasol(DatabaseMetaData metadata) throws SQLException {
+        if (metadata != null && metadata.getDriverName() != null
+                && metadata.getDriverName().toLowerCase().startsWith("exasol") //$NON-NLS-1$
+                && metadata.getDatabaseProductName() != null
+                && metadata.getDatabaseProductName().toLowerCase().startsWith("exasol")) { //$NON-NLS-1$
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * yyi 2010-08-25 for 14851, Sybase DB has several names with different productions and versions. For example the
      * Sybase IQ with version 12.6 is called 'Sybase' getting by JDBC but the version 15+ it is changed to 'Sybase IQ'.
      * it is user by org.talend.cwm.db.connection.ConnectionUtils.isSybase

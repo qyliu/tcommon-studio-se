@@ -344,8 +344,12 @@ public class RepositoryNodeUtilities {
                 RepositoryNode node = (RepositoryNode) childNode;
                 if (isRepositoryFolder(node) || node.getType() == ENodeType.REFERENCED_PROJECT) {
                     folderChild.add(node);
-                } else if (isCurNodeUnderHadoopCluster(node, curNode)) {
-                    return getNodeOfHadoopCluster(node, curNode);
+                } else if (isHadoopClusterNode(node)) {
+                    if (node.getId().equals(curNode.getId()) && node.getObjectType() == curNode.getRepositoryObjectType()) {
+                        return node;
+                    } else {
+                        folderChild.add(node);
+                    }
                 } else if (node.getId().equals(curNode.getId()) && node.getObjectType() == curNode.getRepositoryObjectType()) {
                     return node;
                 }
@@ -362,40 +366,8 @@ public class RepositoryNodeUtilities {
         return null;
     }
 
-    private static boolean isCurNodeUnderHadoopCluster(IRepositoryNode parentNode, IRepositoryViewObject curNodeObject) {
-        if (GlobalServiceRegister.getDefault().isServiceRegistered(IHadoopClusterService.class)) {
-            IHadoopClusterService hadoopClusterService = (IHadoopClusterService) GlobalServiceRegister.getDefault().getService(
-                    IHadoopClusterService.class);
-            boolean isParentNodeOk = hadoopClusterService.isHadoopClusterNode(parentNode);
-            if (isParentNodeOk) {
-                boolean isCurrentNodeOk = false;
-                if (curNodeObject.getRepositoryNode() != null) {
-                    isCurrentNodeOk = hadoopClusterService.isHadoopSubnode(curNodeObject.getRepositoryNode());
-                } else {
-                    isCurrentNodeOk = hadoopClusterService.isHadoopSubItem(curNodeObject.getProperty().getItem());
-                }
-                return isCurrentNodeOk;
-            }
-        }
-        return false;
-    }
-
-    private static RepositoryNode getNodeOfHadoopCluster(IRepositoryNode clusterNode, IRepositoryViewObject curNode) {
-        if (GlobalServiceRegister.getDefault().isServiceRegistered(IHadoopClusterService.class)) {
-            IHadoopClusterService hadoopClusterService = (IHadoopClusterService) GlobalServiceRegister.getDefault().getService(
-                    IHadoopClusterService.class);
-            if (curNode.getRepositoryNode() != null) {
-                if (hadoopClusterService.isHadoopSubnode(curNode.getRepositoryNode())) {
-                    return (RepositoryNode) clusterNode;
-                }
-            } else {
-                Item parentClusterItem = hadoopClusterService.getHadoopClusterBySubitemId(curNode.getId());
-                if (clusterNode.getId().equals(parentClusterItem.getProperty().getId())) {
-                    return (RepositoryNode) clusterNode;
-                }
-            }
-        }
-        return null;
+    private static boolean isHadoopClusterNode(IRepositoryNode node) {
+        return hadoopClusterService != null && hadoopClusterService.isHadoopClusterNode(node);
     }
 
     public static void expandNode(IRepositoryView view, RepositoryNode curNode, Set<RepositoryNode> nodes) {
