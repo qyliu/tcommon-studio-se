@@ -58,13 +58,13 @@
 					
 				</talendType>
 				<talendType type="id_Byte">
-					<dbType type="BF" default="true"/>
-					<dbType type="BYTEINT" />
-					<dbType type="BYTE" />
+					<dbType type="BF"/>
+					<dbType type="BYTEINT" default="true"/>
+					<dbType type="BYTE"/>
 				</talendType>
 				<talendType type="id_byte[]">
-					<dbType type="BF" default="true"/>
-					<dbType type="VARBYTE"/>
+					<dbType type="BF"/>
+					<dbType type="VARBYTE" default="true"/>
 				</talendType>
 				<talendType type="id_Character">
 					<dbType type="BYTE" />
